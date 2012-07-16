@@ -4,8 +4,8 @@ module App
   extend self
 
   include CompileVersion
-  VERSION = "1.2"
-  OS = org.jruby.platform.Platform::OS 
+  VERSION = "1.2_50BELOW"
+  OS = org.jruby.platform.Platform::OS
   OS_VERSION = java.lang.System.getProperty("os.version")
 
   def version
@@ -16,7 +16,7 @@ module App
     "#{OS}.#{OS_VERSION}.#{org.jruby.platform.Platform::ARCH}.ruby-#{::Object::VERSION}.#{COMPILE_TIME}.#{REVISION}"
   end
 
-  
+
   CONFIG_DIR = File.join( java.lang.System.getProperty("user.home") , '.fire-app' )
   AUTOCOMPLTETE_CACHE_DIR = File.join( java.lang.System.getProperty("user.home") , '.fire-app', 'autocomplete_cache' )
 
@@ -52,25 +52,25 @@ module App
   end
 
   def get_config
-    begin 
-      x = YAML.load_file( CONFIG_FILE ) 
+    begin
+      x = YAML.load_file( CONFIG_FILE )
     rescue => e
-      x = {} 
+      x = {}
     end
 
     x.delete("services_http_port") unless x["services_http_port"].to_i > 0
     x.delete("services_livereload_port") unless x["services_livereload_port"].to_i > 0
-                                
+
     config={
-      "show_welcome" => true,
-      "use_version" => 0.12,
+      "show_welcome" => false,
+      "use_version" => 0.11,
       "use_specify_gem_path" => false,
       "notifications" => [ :error, :warning ],
       "save_notification_to_file" => true,
       "services" => [ :http, :livereload],
       "services_http_port" => 24681,
       "services_livereload_port" => 35729,
-      "services_livereload_extensions" => "css,png,jpg,gif,html,erb,haml,coffee,markdown,mkd,md",
+      "services_livereload_extensions" => "aspx,ascx,css,png,jpg,gif,html,erb,haml,coffee,markdown,mkd,md",
       "preferred_syntax" => "scss"
     }
 
@@ -81,7 +81,7 @@ module App
 
     return config
   end
- 
+
   CONFIG = get_config
   def require_compass
 
@@ -96,30 +96,34 @@ module App
       jruby_gems_path = File.join(LIB_PATH, "ruby", "jruby" )
       scan_library( jruby_gems_path )
       require "fssm" if (OS == 'darwin' && OS_VERSION.to_f >= 10.6 ) || OS == 'linux' || OS == 'windows'
-      
+
       require "compass"
       require "compass/exec"
-      
+
     rescue LoadError => e
       if CONFIG["use_specify_gem_path"]
         alert("Load custom Compass fail, use default Compass v0.12 library, please check the Gem Path")
       end
- 
+
 
       common_lib_path = File.join(LIB_PATH, "ruby", "common" )
       scan_library( common_lib_path )
 
-      if App::CONFIG['use_version'] && App::CONFIG['use_version'] < 0.12
-        alert("Welcome to use Fire.app v#{VERSION}!\nFire.app is using Compass 0.12 by default. Compass #{App::CONFIG['use_version']} is no longer supported.\nPlease check our site for more information.")
-        App::CONFIG['use_version']=0.12
-        App.save_config
+      if App::CONFIG['use_version']
+        alert("Hey there 50 Belower! \n\nFire.app is using Compass #{VERSION}! by default.")
+        # App::CONFIG['use_version']=0.12
       end
-      
-      compass_gems_path = File.join(LIB_PATH, "ruby", "compass_0.12")
+
+      if App::CONFIG['use_version'] == 0.12
+        compass_gems_path = File.join(LIB_PATH, "ruby", "compass_0.12")
+      else
+        compass_gems_path = File.join(LIB_PATH, "ruby", "compass_0.11")
+      end
 
       scan_library(compass_gems_path)
 
       extensions_gems_path = File.join(LIB_PATH, "ruby", "compass_extensions" )
+
       scan_library( extensions_gems_path )
 
       require "compass"
@@ -147,14 +151,14 @@ module App
   def set_histoy(dirs)
     File.open(HISTORY_FILE, 'w') do |out|
       YAML.dump(dirs, out)
-    end 
-  end 
+    end
+  end
 
   def get_history
     dirs = YAML.load_file( HISTORY_FILE ) if File.exists?(HISTORY_FILE)
     return dirs if dirs
     return []
-  end 
+  end
 
   def display
     Swt::Widgets::Display.get_current
@@ -172,11 +176,11 @@ module App
   def get_stdout
     begin
       sio = StringIO.new
-      old_stdout, $stdout = $stdout, sio 
+      old_stdout, $stdout = $stdout, sio
       #  Invoke method to test that writes to stdout
       yield
       output = sio.string.gsub(/\e\[\d+m/,'')
-    rescue Exception => e  	
+    rescue Exception => e
       output = e.message
     end
     $stdout = old_stdout # restore stdout
@@ -194,7 +198,7 @@ module App
   def report(msg, target_display = nil, options={}, &block)
     Report.new(msg, target_display, options, &block)
   end
-  
+
   def alert(msg, target_display = nil, &block)
     Alert.new(msg, target_display, &block)
   end
@@ -214,7 +218,7 @@ module App
     end
 
   end
-  
+
   def clear_autocomplete_cache
     history_dirs=App.get_history
       Dir.glob(File.join(App::AUTOCOMPLTETE_CACHE_DIR, '*project')).each do |f|
@@ -222,7 +226,7 @@ module App
         f_project = IO.read(f)
         history_dirs.each do |history_string|
           if f_project == history_string
-            need_delete = false 
+            need_delete = false
             break
           end
         end

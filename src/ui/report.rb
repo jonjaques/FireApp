@@ -58,7 +58,7 @@ class Report
     if options[:show_reset_button]
       button_group =Swt::Widgets::Composite.new( shell, Swt::SWT::NO_MERGE_PAINTS );
       button_group.setLayoutData(gridData)
-      rowlayout = Swt::Layout::RowLayout.new() 
+      rowlayout = Swt::Layout::RowLayout.new()
       rowlayout.marginBottom = 0;
       rowlayout.marginTop = 0;
       rowlayout.spacing = 10;
@@ -66,14 +66,14 @@ class Report
 
       btn = Swt::Widgets::Button.new(button_group, Swt::SWT::PUSH | Swt::SWT::CENTER)
       btn.setText('Quit')
-      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|   
+      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|
         evt.widget.shell.dispose();
       end)
 
       btn = Swt::Widgets::Button.new(button_group, Swt::SWT::PUSH | Swt::SWT::CENTER)
       btn.setText('Quit && Reset my preferences')
-      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|   
-        App::CONFIG['use_version'] = 0.12
+      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|
+        App::CONFIG['use_version'] = 0.11
         App::CONFIG['use_specify_gem_path']=false
         App.save_config
 
@@ -84,16 +84,16 @@ class Report
       btn = Swt::Widgets::Button.new(shell, Swt::SWT::PUSH | Swt::SWT::CENTER)
       btn.setText('OK')
       btn.setLayoutData(gridData)
-      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|   
+      btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|
         block.call if block_given?
         evt.widget.shell.dispose();
       end)
     end
 
     if target_display
-      m=target_display.getPrimaryMonitor().getBounds() 
+      m=target_display.getPrimaryMonitor().getBounds()
       rect = shell.getClientArea();
-      shell.setLocation((m.width-rect.width) /2, (m.height-rect.height) /2) 
+      shell.setLocation((m.width-rect.width) /2, (m.height-rect.height) /2)
     end
     shell.open
     shell.forceActive

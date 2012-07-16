@@ -9,7 +9,7 @@ module Sass::Script
       if fn = environment.function(@name)
         keywords = Sass::Util.map_hash(@keywords) {|k, v| [k, v.perform(environment)]}
         return perform_sass_fn(fn, args, keywords)
-      end 
+      end
 
       ruby_name = @name.tr('-', '_')
       args = construct_ruby_args(ruby_name, args, environment)
@@ -18,7 +18,7 @@ module Sass::Script
         opts(to_literal(args))
       else
         opts(Functions::EvaluationContext.new(environment.options).send(ruby_name, *args))
-      end 
+      end
     rescue ArgumentError => e
       # If this is a legitimate Ruby-raised argument error, re-raise it.
       # Otherwise, it's an error in the user's stylesheet, so wrap it.
@@ -30,7 +30,7 @@ end
 
 
 module Compass
-  
+
   # for add fireapp_build_path configuration property
   module Configuration
     def self.strip_trailing_separator(*args)
@@ -38,17 +38,19 @@ module Compass
     end
   end
 
-  # add fireapp_build_path configuration property
-  Configuration.add_configuration_property(:fireapp_build_path, nil) do
-    nil
-  end
-  
-  Configuration.add_configuration_property(:fireapp_coffeescripts_dir, nil) do
-    "coffeescripts"
+  if Compass::VERSION.to_f >= 0.11
+    # add fireapp_build_path configuration property
+    Configuration.add_configuration_property(:fireapp_build_path, nil) do
+      nil
+    end
+
+    Configuration.add_configuration_property(:fireapp_coffeescripts_dir, nil) do
+      "coffeescripts"
+    end
   end
 
   module Commands
-    class WatchProject 
+    class WatchProject
 
       def perform # we remove  Signal.trap("INT"), add version check on configuration.watches
         check_for_sass_files!(new_compiler_instance)
@@ -79,7 +81,7 @@ module Compass
                 path.create &method(:recompile)
               end
             end
-            
+
             # for coffeescripts
             if File.exists?( Compass.configuration.fireapp_coffeescripts_dir )
               monitor.path Compass.configuration.fireapp_coffeescripts_dir do |path|
@@ -97,21 +99,25 @@ module Compass
                   CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
                 end
               end
-            end 
-            Compass.configuration.watches.each do |glob, callback|
-              monitor.path Compass.configuration.project_path do |path|
-                path.glob glob
-                path.update do |base, relative|
-                  puts ">>> Change detected to: #{relative}"
-                  callback.call(base, relative)
-                end
-                path.create do |base, relative|
-                  puts ">>> New file detected: #{relative}"
-                  callback.call(base, relative)
-                end
-                path.delete do |base, relative|
-                  puts ">>> File Removed: #{relative}"
-                  callback.call(base, relative)
+            end
+
+            # only run this on newer versions.
+            if Compass::VERSION.to_f >= 0.11
+              Compass.configuration.watches.each do |glob, callback|
+                monitor.path Compass.configuration.project_path do |path|
+                  path.glob glob
+                  path.update do |base, relative|
+                    puts ">>> Change detected to: #{relative}"
+                    callback.call(base, relative)
+                  end
+                  path.create do |base, relative|
+                    puts ">>> New file detected: #{relative}"
+                    callback.call(base, relative)
+                  end
+                  path.delete do |base, relative|
+                    puts ">>> File Removed: #{relative}"
+                    callback.call(base, relative)
+                  end
                 end
               end
             end
@@ -137,8 +143,8 @@ module Compass
         check_for_sass_files!(compiler)
         compiler.clean! if compiler.new_config?
         error_count = compiler.run
-        failed! if error_count > 0 
-      end 
+        failed! if error_count > 0
+      end
 
     end
     class CleanProject
@@ -150,8 +156,8 @@ module Compass
         compiler.clean!
         Compass::SpriteImporter.find_all_sprite_map_files(Compass.configuration.generated_images_path).each do |sprite|
           remove sprite
-        end 
-      end 
+        end
+      end
 
     end
   end
@@ -177,7 +183,7 @@ module Compass
     def initialize(*actions)
       self.options = actions.last.is_a?(Hash) ? actions.pop : {}
       @display   = self.options[:display]
-      @log_dir = self.options[:log_dir] 
+      @log_dir = self.options[:log_dir]
       @actions = DEFAULT_ACTIONS.dup
       @actions += actions
     end
@@ -213,17 +219,21 @@ module Compass
 
     # Compile one Sass file
     def compile(sass_filename, css_filename)
-      start_time = end_time = nil 
+      start_time = end_time = nil
       css_content = logger.red do
         timed do
           engine(sass_filename, css_filename).render
-        end 
-      end 
+        end
+      end
       duration = options[:time] ? "(#{(css_content.__duration * 1000).round / 1000.0}s)" : ""
       write_file(css_filename, css_content, options.merge(:force => true, :extra => duration))
-     
-      Compass.configuration.run_stylesheet_saved(css_filename)
-      
+
+      if Compass::VERSION.to_f >= 0.12
+        Compass.configuration.run_stylesheet_saved(css_filename)
+      else
+        Compass.configuration.run_callback(:stylesheet_saved, css_filename )
+      end
+
       # PATCH: write wordlist File
       sass_filename_str = sass_filename.gsub(/[^a-z0-9]/i, '_')
       File.open( File.join( App::AUTOCOMPLTETE_CACHE_DIR, sass_filename_str + "_project" ), 'w' ) do |f|
@@ -246,16 +256,16 @@ module Compass
           end
         end
       end
-    end 
+    end
   end
 end
 
 
 default_path = File.join( java.lang.System.getProperty("user.home"), '.compass','extensions' )
 
-if File.exists?( default_path ) 
+if File.exists?( default_path )
   App.scan_library( default_path )
-  Compass::Frameworks.discover( default_path ) 
-end 
+  Compass::Frameworks.discover( default_path )
+end
 
 

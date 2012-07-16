@@ -11,7 +11,7 @@ class PreferencePanel
     self.create_window if !@shell || @shell.isDisposed
     m=@display.getPrimaryMonitor().getBounds()
     rect = @shell.getClientArea()
-    @shell.setLocation((m.width-rect.width) /2, (m.height-rect.height) /2) 
+    @shell.setLocation((m.width-rect.width) /2, (m.height-rect.height) /2)
     @shell.open
     @shell.forceActive
   end
@@ -48,15 +48,15 @@ class PreferencePanel
     composite =Swt::Widgets::Composite.new(@tabFolder, Swt::SWT::NO_MERGE_PAINTS );
     layout = Swt::Layout::GridLayout.new(1,true);
     composite.layout = layout
-    
+
     label = Swt::Widgets::Label.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     label.setText("We will list the last 10 folders in the history.\nIf you want to clean it, please click the button below.")
 
     clear_history_button = Swt::Widgets::Button.new(composite, Swt::SWT::PUSH )
     clear_history_button.setLayoutData( Swt::Layout::GridData.new(Swt::SWT::TOP, Swt::SWT::LEFT , false, false, 0, 0) )
-    
+
     clear_history_button.text = "Clear History"
-    clear_history_button.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt| 
+    clear_history_button.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt|
       Tray.instance.clear_history
       App.alert('done')
     end)
@@ -69,7 +69,7 @@ class PreferencePanel
     layout.marginWidth = layout.marginHeight = 10
     layout.spacing = 0
     composite.layout = layout
-    
+
     # ====== web server =====
     @service_http_button = Swt::Widgets::Button.new(composite, Swt::SWT::CHECK )
     @service_http_button.setText( 'Enable Web Server' )
@@ -124,7 +124,7 @@ class PreferencePanel
     @livereload_port_text.setText( App::CONFIG["services_livereload_port"].to_s )
     @livereload_port_text.setLayoutData( layoutdata )
     @livereload_port_text.addListener(Swt::SWT::Modify, services_apply_button_handler)
-    
+
     layoutdata = Swt::Layout::FormData.new()
     layoutdata.left = Swt::Layout::FormAttachment.new( livereload_port_label, 0, Swt::SWT::LEFT )
     layoutdata.top  = Swt::Layout::FormAttachment.new( livereload_port_label, 10, Swt::SWT::BOTTOM)
@@ -147,17 +147,17 @@ class PreferencePanel
     livereload_service_info = Swt::Widgets::Link.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     livereload_service_info.setText("livereload applies CSS/JS Changes to browsers without reloading the page, and auto reloads the page when HTML changes")
     livereload_service_info.setLayoutData(layoutdata)
-    livereload_service_info.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt| 
+    livereload_service_info.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt|
        Swt::Program.launch(evt.text)
     end)
-    
+
     layoutdata = Swt::Layout::FormData.new(480, Swt::SWT::DEFAULT)
     layoutdata.left = Swt::Layout::FormAttachment.new( livereload_service_info, 0, Swt::SWT::LEFT )
     layoutdata.top  = Swt::Layout::FormAttachment.new( livereload_service_info, 0, Swt::SWT::BOTTOM)
     livereload_service_help_info = Swt::Widgets::Link.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     livereload_service_help_info.setText("You have to install <a href=\"https://github.com/handlino/FireApp/wiki/Preferences\">livereload browser extension or use livereload-js</a> to use this feature.")
     livereload_service_help_info.setLayoutData(layoutdata)
-    livereload_service_help_info.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt| 
+    livereload_service_help_info.addListener(Swt::SWT::Selection, Swt::Widgets::Listener.impl do |method, evt|
        Swt::Program.launch(evt.text)
     end)
 
@@ -172,21 +172,21 @@ class PreferencePanel
      return composite
   end
 
-  def services_button_handler 
-    Swt::Widgets::Listener.impl do |method, evt|   
+  def services_button_handler
+    Swt::Widgets::Listener.impl do |method, evt|
       App::CONFIG["services"] = []
-      App::CONFIG["services"] << :http if @service_http_button.getSelection       
-      App::CONFIG["services"] << :livereload if @service_livereload_button.getSelection       
+      App::CONFIG["services"] << :http if @service_http_button.getSelection
+      App::CONFIG["services"] << :livereload if @service_livereload_button.getSelection
       App.save_config
       Tray.instance.rewatch
     end
   end
-  
-  def services_apply_button_handler 
-    Swt::Widgets::Listener.impl do |method, evt|   
-      
+
+  def services_apply_button_handler
+    Swt::Widgets::Listener.impl do |method, evt|
+
       if  @http_port_text.getText.to_i != App::CONFIG['services_http_port'] ||
-        @livereload_port_text.getText.to_i != App::CONFIG['services_livereload_port'] 
+        @livereload_port_text.getText.to_i != App::CONFIG['services_livereload_port']
 
           @services_apply_button.visible = true
       end
@@ -194,8 +194,8 @@ class PreferencePanel
     end
   end
 
-  def services_port_handler 
-    Swt::Widgets::Listener.impl do |method, evt|   
+  def services_port_handler
+    Swt::Widgets::Listener.impl do |method, evt|
       has_change = false
       port = @http_port_text.getText
       if !(port =~ /^[0-9]+$/) || port.to_i < 0 || port.to_i > 65535
@@ -205,7 +205,7 @@ class PreferencePanel
         port = port.to_i
         if App::CONFIG['services_http_port'] != port
           App::CONFIG['services_http_port'] = port
-          has_change = true 
+          has_change = true
         end
       end
 
@@ -217,7 +217,7 @@ class PreferencePanel
         port = port.to_i
         if App::CONFIG['services_livereload_port'] != port
           App::CONFIG['services_livereload_port'] = port
-          has_change = true 
+          has_change = true
         end
 
       end
@@ -238,7 +238,7 @@ class PreferencePanel
   end
 
   def services_extensions_handler
-    Swt::Widgets::Listener.impl do |method, evt|  
+    Swt::Widgets::Listener.impl do |method, evt|
       extensions = @livereload_extensions_text.getText.split(/,/).map!{|x| x.strip }.join(',')
       if extensions != App::CONFIG["services_livereload_extensions"]
         @services_apply_button.visible = true
@@ -261,7 +261,7 @@ class PreferencePanel
     layoutdata.top = Swt::Layout::FormAttachment.new( label,  5, Swt::SWT::BOTTOM)
     button_group =Swt::Widgets::Composite.new( composite, Swt::SWT::NO_MERGE_PAINTS );
     button_group.setLayoutData( layoutdata )
-    layout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL) 
+    layout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL)
     layout.spacing = 10
     button_group.setLayout( layout );
 
@@ -295,13 +295,13 @@ class PreferencePanel
     return  composite
   end
 
-  def notification_button_handler 
-    Swt::Widgets::Listener.impl do |method, evt|   
+  def notification_button_handler
+    Swt::Widgets::Listener.impl do |method, evt|
       notifications = []
-      if @notification_error_button.getSelection 
+      if @notification_error_button.getSelection
         notifications += [ :error, :warnings ]
       end
-      if @notification_change_button.getSelection 
+      if @notification_change_button.getSelection
         notifications += [ :directory, :remove, :create, :overwrite, :compile, :identical ]
       end
       App::CONFIG["notifications"] = notifications
@@ -318,7 +318,7 @@ class PreferencePanel
     layout.marginLeft = 19
     layout.spacing = 0
     composite.layout = layout
-  
+
     # ===== Preferred Syntax =====
     preferred_syntax_label = Swt::Widgets::Label.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     data = Swt::Layout::FormData.new( )
@@ -331,7 +331,7 @@ class PreferencePanel
     data.top = Swt::Layout::FormAttachment.new(  preferred_syntax_label, 0, Swt::SWT::TOP)
     button_group.setLayoutData( data )
 
-    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL) 
+    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL)
     rowlayout.marginBottom = 0;
     rowlayout.marginTop = 0;
     rowlayout.spacing = 6;
@@ -349,37 +349,40 @@ class PreferencePanel
 
 
     # ===== Compass Version =====
-    
+
     compass_version_label = Swt::Widgets::Label.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     compass_version_label.setText("Compass Version:")
     data = Swt::Layout::FormData.new()
     data.right = Swt::Layout::FormAttachment.new( preferred_syntax_label, 0, Swt::SWT::RIGHT)
     data.top = Swt::Layout::FormAttachment.new(  button_group, 18, Swt::SWT::BOTTOM)
     compass_version_label.setLayoutData( data )
-   
+
     button_group =Swt::Widgets::Composite.new(composite, Swt::SWT::NO_MERGE_PAINTS );
     data = Swt::Layout::FormData.new(380,Swt::SWT::DEFAULT)
     data.left = Swt::Layout::FormAttachment.new( compass_version_label, 5, Swt::SWT::RIGHT)
     data.top = Swt::Layout::FormAttachment.new(  compass_version_label, 0, Swt::SWT::TOP)
     button_group.setLayoutData( data )
 
-    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL) 
+    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL)
     rowlayout.marginBottom = 0;
     rowlayout.marginTop = 0;
     rowlayout.spacing = 6;
     button_group.setLayout( rowlayout );
 
+    @button_v11 = Swt::Widgets::Button.new(button_group, Swt::SWT::RADIO )
+    @button_v11.setText("Compass 0.11.7 (Legacy)")
+    @button_v11.setSelection( App::CONFIG['use_version'] == 0.11  )
+    @button_v11.addListener(Swt::SWT::Selection, compass_version_button_handler)
+
     @button_v12 = Swt::Widgets::Button.new(button_group, Swt::SWT::RADIO )
-    @button_v12.setText("Default")
+    @button_v12.setText("Compass 0.12.2")
     @button_v12.setSelection( App::CONFIG['use_version'] == 0.12  )
     @button_v12.addListener(Swt::SWT::Selection, compass_version_button_handler)
-
 
     @use_specify_gem_path_btn = Swt::Widgets::Button.new(button_group, Swt::SWT::RADIO )
     @use_specify_gem_path_btn.setText("Custom (advanced users only)")
     @use_specify_gem_path_btn.setSelection(App::CONFIG['use_specify_gem_path'])
     @use_specify_gem_path_btn.addListener(Swt::SWT::Selection, compass_version_button_handler)
-
 
     special_gem_label = Swt::Widgets::Label.new( composite, Swt::SWT::LEFT | Swt::SWT::WRAP)
     special_gem_label.setText('You can use RubyGem to manage Compass and its extensions. Use "gem env path" command to find your gem paths.')
@@ -396,13 +399,13 @@ class PreferencePanel
     @gem_path_text.setLayoutData( simple_formdata( special_gem_label_ex, 0, 7, 320) )
     @gem_path_text.addListener(Swt::SWT::Modify, compass_version_button_handler)
 
-    @use_specify_gem_path_btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|   
+    @use_specify_gem_path_btn.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|
       @gem_path_text.setEnabled(evt.widget.getSelection)
 
     end)
-    
+
     @apply_group =Swt::Widgets::Composite.new(composite, Swt::SWT::NO_MERGE_PAINTS );
-    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL) 
+    rowlayout = Swt::Layout::RowLayout.new(Swt::SWT::VERTICAL)
     rowlayout.marginBottom = 0;
     rowlayout.spacing = 3;
     @apply_group.setLayout( rowlayout );
@@ -416,7 +419,7 @@ class PreferencePanel
 
     compass_version_apply_button = Swt::Widgets::Button.new(@apply_group, Swt::SWT::PUSH )
     compass_version_apply_button.setText("Apply Change")
-    compass_version_apply_button.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|   
+    compass_version_apply_button.addListener(Swt::SWT::Selection,Swt::Widgets::Listener.impl do |method, evt|
       if @button_v12.getSelection
         App::CONFIG['use_version'] = 0.12
       else
@@ -435,25 +438,25 @@ class PreferencePanel
   end
 
   def preferred_syntax_button_handler
-   Swt::Widgets::Listener.impl do |method, evt|   
+   Swt::Widgets::Listener.impl do |method, evt|
       if @button_preffered_scss.getSelection
         App::CONFIG['preferred_syntax'] = "scss"
       else
         App::CONFIG['preferred_syntax'] = "sass"
-      end 
+      end
       App.save_config
     end
   end
 
-  def compass_version_button_handler 
-    Swt::Widgets::Listener.impl do |method, evt|   
-      if  ( @button_v12.getSelection && App::CONFIG['use_version'] == 0.12 ) || 
+  def compass_version_button_handler
+    Swt::Widgets::Listener.impl do |method, evt|
+      if  ( @button_v12.getSelection && App::CONFIG['use_version'] == 0.12 ) ||
           ( @use_specify_gem_path_btn.getSelection && App::CONFIG['use_version'] == false &&
              App::CONFIG['gem_path'] == @gem_path_text.getText )
         @apply_group.setVisible(false)
       else
         @apply_group.setVisible(true)
-      end 
+      end
     end
   end
 

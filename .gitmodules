@@ -4,3 +4,6 @@
 [submodule "lib/ruby/common/tka-rack-coffee"]
 	path = lib/ruby/common/tka-rack-coffee
 	url = git@github.com:tka/rack-coffee
+[submodule "lib/ruby/compass_0.11/compass-0.11.7"]
+  path = lib/ruby/compass_0.11/compass-0.11.7
+  url = https://github.com/chriseppstein/compass.git
