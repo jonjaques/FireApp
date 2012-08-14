@@ -109,10 +109,10 @@ module App
       common_lib_path = File.join(LIB_PATH, "ruby", "common" )
       scan_library( common_lib_path )
 
-      if App::CONFIG['use_version']
-        alert("Hey there 50 Belower! \n\nFire.app is using Compass #{VERSION}! by default.")
-        # App::CONFIG['use_version']=0.12
-      end
+      # if App::CONFIG['use_version']
+      #   alert("Hey there 50 Belower! \n\nFire.app is using Compass #{VERSION}! by default.")
+      #   App::CONFIG['use_version']=0.12
+      # end
 
       if App::CONFIG['use_version'] == 0.12
         compass_gems_path = File.join(LIB_PATH, "ruby", "compass_0.12")

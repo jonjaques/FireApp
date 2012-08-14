@@ -38,7 +38,7 @@ module Compass
     end
   end
 
-  if Compass::VERSION.to_f >= 0.11
+  if Compass::VERSION.to_f > 0.11
     # add fireapp_build_path configuration property
     Configuration.add_configuration_property(:fireapp_build_path, nil) do
       nil
@@ -83,20 +83,22 @@ module Compass
             end
 
             # for coffeescripts
-            if File.exists?( Compass.configuration.fireapp_coffeescripts_dir )
-              monitor.path Compass.configuration.fireapp_coffeescripts_dir do |path|
-                path.glob '**/*.coffee'
-                path.update do |base, relative|
-                  puts ">>> Change detected to: #{relative}"
-                  CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
-                end
-                path.create do |base, relative|
-                  puts ">>> New file detected: #{relative}"
-                  CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
-                end
-                path.delete do |base, relative|
-                  puts ">>> File Removed: #{relative}"
-                  CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+            if Compass::VERSION.to_f > 0.11
+              if File.exists?( Compass.configuration.fireapp_coffeescripts_dir )
+                monitor.path Compass.configuration.fireapp_coffeescripts_dir do |path|
+                  path.glob '**/*.coffee'
+                  path.update do |base, relative|
+                    puts ">>> Change detected to: #{relative}"
+                    CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+                  end
+                  path.create do |base, relative|
+                    puts ">>> New file detected: #{relative}"
+                    CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+                  end
+                  path.delete do |base, relative|
+                    puts ">>> File Removed: #{relative}"
+                    CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+                  end
                 end
               end
             end
@@ -135,22 +137,30 @@ module Compass
 
     class UpdateProject
       def perform
-        if File.exists?( Compass.configuration.fireapp_coffeescripts_dir )
-          CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+        # don't parse coffeescript for compass 0.11
+        if Compass::VERSION.to_f > 0.11
+          if File.exists?( Compass.configuration.fireapp_coffeescripts_dir)
+            CoffeeCompiler.compile_folder( Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir );
+          end
         end
 
         compiler = new_compiler_instance
         check_for_sass_files!(compiler)
         compiler.clean! if compiler.new_config?
         error_count = compiler.run
-        failed! if error_count > 0
+        unless error_count.nil?
+          failed! if error_count > 0
+        end
       end
 
     end
     class CleanProject
       def perform
-        if File.exists?( Compass.configuration.fireapp_coffeescripts_dir )
-          CoffeeCompiler.clean_compile_folder(Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir )
+        # don't parse coffeescript for compass 0.11
+        if Compass::VERSION.to_f > 0.11
+          if File.exists?( Compass.configuration.fireapp_coffeescripts_dir)
+            CoffeeCompiler.clean_compile_folder(Compass.configuration.fireapp_coffeescripts_dir, Compass.configuration.javascripts_dir )
+          end
         end
         compiler = new_compiler_instance
         compiler.clean!
